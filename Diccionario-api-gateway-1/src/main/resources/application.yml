@@ -1,0 +1,16 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+      - id: diccionario-spring
+        uri: lb://diccionario-spring
+        predicates:
+          - Path=/api/spring/**
+        filters: 
+          - StripPrefix=2
+      - id: diccionario-java8
+        uri: lb://diccionario-java8
+        predicates:
+          - Path=/api/java/**
+        filters:
+          - StripPrefix=2
