@@ -12,7 +12,7 @@ import com.diccionario.juan.entity.Spring;
 public interface SpringAMapper extends GenericMapper<Spring,SpringDto> {
 
 	@Override
-	@Mapping(source = "java8.definicion", target = "definicion")
+	@Mapping(source = "entity.definicion", target = "definicion")
 	SpringDto entityToDto(Spring entity);
 
 	

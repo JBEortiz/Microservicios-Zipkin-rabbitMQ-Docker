@@ -4,17 +4,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.diccionario.juan.dto.AbstractDto;
 import com.diccionario.juan.mapper.GenericMapper;
 
-import brave.Tracer;
-import lombok.extern.slf4j.Slf4j;
-@Slf4j
 public abstract class AbstractServiceImpl<D extends AbstractDto<?>, E, K> {
 
 	@Autowired
@@ -23,14 +20,15 @@ public abstract class AbstractServiceImpl<D extends AbstractDto<?>, E, K> {
 	@Autowired
 	protected GenericMapper<E, D> mapper;
 
-	@Autowired
-	private Tracer trace;
 	
 	public List<D> getAll() {
 		List<D> genericList = repository.findAll().stream().map(mapper::entityToDto).collect(Collectors.toList());
 
 		return genericList;
 	}
+	
+	/* Guardar en cache	 */
+	@Cacheable("java8")
 	public Optional<D> getById(K id) {
 		E entity = repository.findById(id).orElse(null);
 		D dto = mapper.entityToDto(entity);
@@ -42,7 +40,8 @@ public abstract class AbstractServiceImpl<D extends AbstractDto<?>, E, K> {
 		Optional.of(repository.save(entity));
 	}
 
-	
+	/* Borrar la cache */
+	@CacheEvict("java8")
 	public void delete(K id) {
 		Optional<E> entity= repository.findById(id);
 		if (entity.isPresent()) {

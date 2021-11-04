@@ -5,6 +5,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.diccionario.juan.dto.AbstractDto;
@@ -20,14 +22,12 @@ public class AbstractServiceImpl<D extends AbstractDto<?>,E,K>  {
 	@Autowired
 	protected GenericMapper<E, D> mapper;
 
-	@Autowired
-	private Tracer trace;
 	
 	public List<D> getAll() {
 		List<D> genericList= repository.findAll().stream().map(mapper::entityToDto).collect(Collectors.toList());
 		return genericList;
 	}
-	
+	@Cacheable("spring")
 	public Optional<D> getById(K id) {
 		E entity= repository.findById(id).orElse(null);
 		D dto= mapper.entityToDto(entity);
@@ -38,6 +38,7 @@ public class AbstractServiceImpl<D extends AbstractDto<?>,E,K>  {
 		Optional.of(repository.save(entity));
 		
 	}
+	@CacheEvict("spring")
 	public void delete(K id) {
 		 Optional<E> entity= repository.findById(id);
 		 if (entity.isPresent()) {
